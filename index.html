@@ -5,22 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Bora'nın Rutin Çarkı</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Bora'nın Günü">
   <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/sun.png">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     :root {
-      --bg: #121316;
-      --card-bg: #1C1E24;
-      --card-active: #262932;
-      --card-done: #16181D;
+      --bg: #F5F7FB;
+      --card-bg: #FFFFFF;
+      --card-active: #FFFFFF;
+      --card-done: #F0F2F6;
       --primary: #FF5E3A;
       --accent: #2979FF;
-      --success: #00E676;
-      --text: #F5F6FA;
-      --text-muted: #8E94A5;
-      --border: #2B2F3A;
+      --success: #00C853;
+      --text: #1E2530;
+      --text-muted: #78909C;
+      --border: #E2E8F0;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
@@ -50,13 +50,13 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255, 193, 7, 0.15);
-      border: 1px solid rgba(255, 193, 7, 0.3);
+      background: #FFF9C4;
+      border: 1px solid #FFE082;
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 1.1rem;
       font-weight: 800;
-      color: #FFD54F;
+      color: #F57F17;
     }
 
     /* Gün Seçici */
@@ -74,7 +74,7 @@
       padding: 8px 16px;
       border: 1px solid var(--border);
       border-radius: 14px;
-      background: var(--card-bg);
+      background: #FFFFFF;
       font-weight: 800;
       font-size: 0.9rem;
       color: var(--text-muted);
@@ -85,10 +85,10 @@
       background: var(--primary);
       color: #FFFFFF;
       border-color: var(--primary);
-      box-shadow: 0 4px 14px rgba(255, 94, 58, 0.35);
+      box-shadow: 0 4px 14px rgba(255, 94, 58, 0.25);
     }
 
-    /* Freeletics İlerleme Bölümü */
+    /* İlerleme Çubuğu */
     .progress-section {
       padding: 14px 18px 6px;
       display: flex;
@@ -101,14 +101,13 @@
       align-items: center;
       font-size: 0.85rem;
       font-weight: 800;
-      letter-spacing: 0.5px;
       color: var(--text-muted);
       text-transform: uppercase;
     }
     .progress-track {
       width: 100%;
       height: 8px;
-      background: var(--border);
+      background: #E2E8F0;
       border-radius: 4px;
       overflow: hidden;
     }
@@ -119,7 +118,7 @@
       transition: width 0.3s ease;
     }
 
-    /* Freeletics Zaman Tüneli / Liste */
+    /* Freeletics Tarzı Zaman Akışı */
     .timeline-container {
       padding: 16px 18px 40px;
       display: flex;
@@ -140,40 +139,46 @@
       gap: 14px;
       position: relative;
       transition: all 0.25s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
     .task-card.active-step {
       border-color: var(--primary);
+      border-left: 6px solid var(--primary);
       background: var(--card-active);
-      box-shadow: 0 6px 20px rgba(255, 94, 58, 0.18);
+      box-shadow: 0 6px 18px rgba(255, 94, 58, 0.12);
       transform: scale(1.01);
     }
     .task-card.done {
       background: var(--card-done);
-      border-color: rgba(0, 230, 118, 0.2);
-      opacity: 0.65;
+      border-color: #E2E8F0;
+      opacity: 0.6;
     }
     .task-card.done .task-name {
       text-decoration: line-through;
       color: var(--text-muted);
     }
 
-    /* Durum ve Piktogram Çemberi */
     .visual-avatar {
       width: 58px;
       height: 58px;
       border-radius: 16px;
-      background: #232731;
+      background: #F1F4F9;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 2.1rem;
       flex-shrink: 0;
-      position: relative;
       border: 2px solid var(--border);
+      overflow: hidden;
+    }
+    .visual-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .task-card.active-step .visual-avatar {
       border-color: var(--primary);
-      background: #2E2827;
+      background: #FFF3E0;
     }
     .task-card.done .visual-avatar {
       border-color: var(--success);
@@ -189,25 +194,23 @@
       font-size: 0.85rem;
       font-weight: 800;
       color: var(--primary);
-      letter-spacing: 0.5px;
     }
     .task-card.done .task-time {
       color: var(--text-muted);
     }
     .task-name {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 800;
       color: var(--text);
     }
 
-    /* Freeletics Tarzı Tamamla / Tik Düğmesi */
     .btn-check {
       width: 48px;
       height: 48px;
       border-radius: 50%;
       border: 2px solid var(--border);
-      background: #22252E;
-      color: #585F73;
+      background: #F1F4F9;
+      color: #90A4AE;
       font-size: 1.3rem;
       display: flex;
       justify-content: center;
@@ -219,33 +222,31 @@
     .task-card.active-step .btn-check {
       border-color: var(--primary);
       color: var(--primary);
-      background: rgba(255, 94, 58, 0.1);
+      background: #FFF3E0;
     }
     .task-card.done .btn-check {
       background: var(--success);
       border-color: var(--success);
-      color: #121316;
+      color: #FFFFFF;
       font-weight: 900;
     }
 
     .btn-sound-mini {
       background: none;
       border: none;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       color: var(--text-muted);
       cursor: pointer;
       padding: 4px;
     }
 
-    /* Alt Araçlar (Günü Sıfırla vb.) */
     .list-footer {
       display: flex;
       justify-content: center;
-      gap: 12px;
       margin-top: 10px;
     }
     .btn-reset-day {
-      background: #232731;
+      background: #FFFFFF;
       border: 1px solid var(--border);
       color: var(--text-muted);
       padding: 10px 18px;
@@ -255,25 +256,24 @@
       cursor: pointer;
     }
 
-    /* Modal / Parent Panel */
+    /* Modal / Ebeveyn Paneli */
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.5);
       z-index: 100;
       justify-content: center;
       align-items: flex-end;
     }
     .modal-content {
-      background: #1C1E24;
+      background: #FFFFFF;
       width: 100%;
       max-width: 540px;
       border-radius: 28px 28px 0 0;
       padding: 22px 18px;
       max-height: 88vh;
       overflow-y: auto;
-      border-top: 1px solid var(--border);
     }
     .catalog-grid {
       display: grid;
@@ -282,7 +282,7 @@
       margin-bottom: 16px;
     }
     .catalog-item {
-      background: #262932;
+      background: #F8F9FB;
       padding: 10px 6px;
       border-radius: 14px;
       text-align: center;
@@ -290,24 +290,37 @@
       font-size: 0.82rem;
       font-weight: 700;
       border: 1px solid var(--border);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-    .catalog-item span { font-size: 1.9rem; display: block; margin-bottom: 4px; }
+    .catalog-item span { font-size: 1.9rem; margin-bottom: 4px; }
+    .catalog-thumb {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 4px;
+    }
     .parent-task-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px 12px;
-      background: #262932;
+      background: #F8F9FB;
       border-radius: 12px;
       margin-bottom: 8px;
+      border: 1px solid var(--border);
     }
     .time-input-inline {
-      border: 1px solid var(--border);
+      border: 1.5px solid #CFD8DC;
       border-radius: 8px;
       padding: 4px 6px;
       font-weight: 800;
-      color: #FFF;
-      background: #121316;
+      color: var(--text);
+      background: #FFFFFF;
       font-size: 0.95rem;
       outline: none;
     }
@@ -321,7 +334,7 @@
       cursor: pointer;
     }
     .btn-secondary {
-      background: #262932;
+      background: #F1F4F9;
       border: 1px solid var(--border);
       padding: 10px 14px;
       border-radius: 12px;
@@ -330,7 +343,7 @@
       cursor: pointer;
     }
 
-    /* 50MM TERMAL BASKI TASARIMI */
+    /* 50MM Termal Baskı Şablonu */
     @media print {
       @page {
         size: 50mm auto;
@@ -342,7 +355,7 @@
         margin: 0;
         padding: 0;
       }
-      header, .days-nav, .progress-section, .timeline-container, .modal, .no-print {
+      header, .days-nav, .progress-section, .timeline-container, .list-footer, .modal, .no-print {
         display: none !important;
       }
       #print-thermal-receipt {
@@ -397,13 +410,12 @@
       <span>⭐</span>
       <span id="star-count">0</span>
     </div>
-    <div style="font-weight: 900; letter-spacing: 0.5px; font-size: 1.1rem; color: #FFF;">BORA'NIN SEANSI</div>
-    <button onclick="openParentModal()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:#FFF;">⚙️</button>
+    <div style="font-weight: 900; font-size: 1.1rem; color: var(--text);">BORA'NIN GÜNÜ</div>
+    <button onclick="openParentModal()" style="background:none; border:none; font-size:1.4rem; cursor:pointer;">⚙️</button>
   </header>
 
   <div class="days-nav no-print" id="days-container"></div>
 
-  <!-- Freeletics Progress Bar -->
   <div class="progress-section no-print">
     <div class="progress-meta">
       <span id="progress-label">0 / 0 TAMAMLANDI</span>
@@ -414,7 +426,6 @@
     </div>
   </div>
 
-  <!-- Dikey Freeletics Akışı -->
   <div class="timeline-container no-print" id="timeline-list"></div>
 
   <div class="list-footer no-print">
@@ -437,8 +448,8 @@
   <div class="modal" id="parent-modal">
     <div class="modal-content">
       <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom: 14px;">
-        <h3 style="margin:0; color:#FFF;">Ebeveyn & Günlük Plan</h3>
-        <button onclick="closeParentModal()" style="border:none; background:none; font-size:1.4rem; color:#8E94A5; cursor:pointer;">✕</button>
+        <h3 style="margin:0;">Ebeveyn & Günlük Plan</h3>
+        <button onclick="closeParentModal()" style="border:none; background:none; font-size:1.4rem; color:var(--text-muted); cursor:pointer;">✕</button>
       </div>
 
       <div style="display: flex; gap: 8px; margin-bottom: 14px;">
@@ -446,20 +457,20 @@
         <button class="btn-secondary" onclick="resetStars()">⭐ Sıfırla</button>
       </div>
 
-      <h4 style="margin: 10px 0 6px 0; color:#8E94A5;">Havuzdan Görev Ekle</h4>
+      <h4 style="margin: 10px 0 6px 0;">Havuzdan Görev Ekle</h4>
       <div class="catalog-grid" id="catalog-list"></div>
 
-      <h4 style="margin: 14px 0 6px 0; color:#8E94A5;">Özel Resim / Görev Ekle</h4>
-      <div style="display:flex; flex-direction:column; gap:8px; background:#262932; padding:10px; border-radius:12px;">
-        <input type="text" id="custom-title" placeholder="Görev Adı" style="padding:8px; border:1px solid var(--border); border-radius:8px; background:#121316; color:#FFF;">
+      <h4 style="margin: 14px 0 6px 0;">Özel Resim / Görev Ekle (Kalıcı Havuz)</h4>
+      <div style="display:flex; flex-direction:column; gap:8px; background:#F8F9FB; padding:10px; border-radius:12px; border:1px solid var(--border);">
+        <input type="text" id="custom-title" placeholder="Görev Adı (Örn: Legoları Kaldır)" style="padding:8px; border:1px solid var(--border); border-radius:8px;">
         <div style="display:flex; gap:6px; align-items:center;">
           <input type="time" id="custom-time" value="09:00" class="time-input-inline">
-          <input type="file" id="custom-photo" accept="image/*" style="font-size:0.8rem; flex:1; color:#8E94A5;">
+          <input type="file" id="custom-photo" accept="image/*" style="font-size:0.8rem; flex:1;">
         </div>
-        <button class="btn-secondary" style="background:var(--accent); color:white; border:none;" onclick="addCustomTask()">Listeye Ekle</button>
+        <button class="btn-secondary" style="background:var(--accent); color:white; border:none;" onclick="addCustomTask()">Havuza ve Güne Ekle</button>
       </div>
 
-      <h4 style="margin: 16px 0 6px 0; color:#8E94A5;" id="current-day-label">Seçili Günün Görevleri</h4>
+      <h4 style="margin: 16px 0 6px 0;" id="current-day-label">Seçili Günün Görevleri</h4>
       <div id="parent-task-list"></div>
     </div>
   </div>
@@ -467,10 +478,18 @@
   <script>
     const DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
     const DAY_NAMES = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-    let selectedDayIdx = 0;
+
+    // Cihazın bugünkü gününü otomatik seçer
+    function getTodayIndex() {
+      const jsDay = new Date().getDay();
+      return jsDay === 0 ? 6 : jsDay - 1;
+    }
+
+    let selectedDayIdx = getTodayIndex();
     let starCount = parseInt(localStorage.getItem('bora_stars') || '0');
 
-    const CATALOG = [
+    // Standart Katalog Havuzu
+    const BASE_CATALOG = [
       { title: "Kesme Biçme Vakti", icon: "✂️", dur: 20 },
       { title: "Kitap Okuma", icon: "📖", dur: 15 },
       { title: "Spor", icon: "⚽", dur: 30 },
@@ -488,9 +507,10 @@
       { title: "Uyku Vakti", icon: "🌙", dur: 15 }
     ];
 
-    let schedules = JSON.parse(localStorage.getItem('bora_schedules') || '{}');
+    // Elle eklenen özel görevlerin kalıcı saklandığı havuz
+    let customCatalog = JSON.parse(localStorage.getItem('bora_custom_catalog') || '[]');
 
-    // Kalıcı tamamlanan görevler deposu { "dayIndex_taskIndex": true }
+    let schedules = JSON.parse(localStorage.getItem('bora_schedules') || '{}');
     let completedStore = JSON.parse(localStorage.getItem('bora_completed_tasks') || '{}');
 
     if (!schedules[0]) {
@@ -517,6 +537,10 @@
       localStorage.setItem('bora_completed_tasks', JSON.stringify(completedStore));
     }
 
+    function saveCustomCatalog() {
+      localStorage.setItem('bora_custom_catalog', JSON.stringify(customCatalog));
+    }
+
     function sortTasksByTime() {
       if (schedules[selectedDayIdx]) {
         schedules[selectedDayIdx].sort((a, b) => (a.time || '00:00').localeCompare(b.time || '00:00'));
@@ -527,7 +551,7 @@
       document.getElementById('star-count').innerText = starCount;
       renderDays();
       renderCatalog();
-      loadDay(0);
+      loadDay(selectedDayIdx);
     }
 
     function renderDays() {
@@ -577,7 +601,7 @@
         card.className = `task-card ${isDone ? 'done' : ''} ${isCurrentActive ? 'active-step' : ''}`;
 
         const avatarContent = t.photo 
-          ? `<img src="${t.photo}" style="width:100%; height:100%; border-radius:14px; object-fit:cover;">` 
+          ? `<img src="${t.photo}">` 
           : (t.icon || '⭐');
 
         card.innerHTML = `
@@ -595,6 +619,14 @@
       });
 
       updateProgress(doneCount, tasks.length);
+
+      // Aktif göreve otomatik odaklanma
+      setTimeout(() => {
+        const activeEl = document.querySelector('.task-card.active-step');
+        if (activeEl) {
+          activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 150);
     }
 
     function updateProgress(done, total) {
@@ -613,6 +645,12 @@
         starCount += 1;
         document.getElementById('star-count').innerText = starCount;
         localStorage.setItem('bora_stars', starCount);
+
+        // Titreşim desteği
+        if (navigator.vibrate) {
+          try { navigator.vibrate([35, 30, 45]); } catch(e){}
+        }
+
         playSuccessSound();
         confetti({ particleCount: 70, spread: 50, origin: { y: 0.7 } });
       } else {
@@ -651,8 +689,18 @@
     }
 
     function speakTask(text) {
-      const msg = new SpeechSynthesisUtterance(text);
+      const compliments = [
+        `Harika gidiyorsun Bora! Sırada: ${text}`,
+        `Süpersin Bora! Şimdi vakti: ${text}`,
+        `Hadi bakalım! Sıradaki görevimiz: ${text}`,
+        `Çok iyi gidiyorsun! Görevimiz: ${text}`
+      ];
+      const randomMsg = compliments[Math.floor(Math.random() * compliments.length)];
+      
+      window.speechSynthesis.cancel();
+      const msg = new SpeechSynthesisUtterance(randomMsg);
       msg.lang = 'tr-TR';
+      msg.rate = 0.95;
       window.speechSynthesis.speak(msg);
     }
 
@@ -661,6 +709,7 @@
       const code = prompt("Ebeveyn Kilidi: 3 + 4 = ?");
       if (code === "7") {
         document.getElementById('parent-modal').style.display = 'flex';
+        renderCatalog();
         renderParentTaskList();
       }
     }
@@ -673,10 +722,17 @@
     function renderCatalog() {
       const el = document.getElementById('catalog-list');
       el.innerHTML = '';
-      CATALOG.forEach(item => {
+
+      const fullPool = [...BASE_CATALOG, ...customCatalog];
+
+      fullPool.forEach(item => {
         const d = document.createElement('div');
         d.className = 'catalog-item';
-        d.innerHTML = `<span>${item.icon}</span>${item.title}`;
+        if (item.photo) {
+          d.innerHTML = `<img src="${item.photo}" class="catalog-thumb">${item.title}`;
+        } else {
+          d.innerHTML = `<span>${item.icon || '⭐'}</span>${item.title}`;
+        }
         d.onclick = () => addTaskFromCatalog(item);
         el.appendChild(d);
       });
@@ -689,58 +745,89 @@
       if (!schedules[selectedDayIdx]) schedules[selectedDayIdx] = [];
       schedules[selectedDayIdx].push({
         title: item.title,
-        icon: item.icon,
+        icon: item.icon || "⭐",
+        photo: item.photo || null,
         time: suggestedTime.trim() || "12:00",
-        dur: item.dur
+        dur: item.dur || 20
       });
       sortTasksByTime();
       saveSchedules();
       renderParentTaskList();
     }
 
+    // iOS hafızasını şişirmemek için fotoğraf boyutlandırma
+    function resizeImage(file, maxWidth, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
     function addCustomTask() {
       const title = document.getElementById('custom-title').value.trim();
-      const time = document.getElementById('custom-time').value;
+      const time = document.getElementById('custom-time').value || "09:00";
       const fileInput = document.getElementById('custom-photo');
 
       if (!title) return alert("Lütfen bir başlık girin.");
 
       if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          schedules[selectedDayIdx].push({
-            title: title,
-            photo: e.target.result,
-            time: time,
-            dur: 20
-          });
+        resizeImage(fileInput.files[0], 250, function(resizedBase64) {
+          const newTask = { title: title, photo: resizedBase64, time: time, dur: 20 };
+
+          if (!schedules[selectedDayIdx]) schedules[selectedDayIdx] = [];
+          schedules[selectedDayIdx].push(newTask);
           sortTasksByTime();
           saveSchedules();
+
+          // Kalıcı havuza da kaydeder
+          customCatalog.push({ title: title, photo: resizedBase64, dur: 20 });
+          saveCustomCatalog();
+
+          renderCatalog();
           renderParentTaskList();
           document.getElementById('custom-title').value = '';
           fileInput.value = '';
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        schedules[selectedDayIdx].push({
-          title: title,
-          icon: "🎯",
-          time: time,
-          dur: 20
         });
+      } else {
+        const newTask = { title: title, icon: "🎯", time: time, dur: 20 };
+
+        if (!schedules[selectedDayIdx]) schedules[selectedDayIdx] = [];
+        schedules[selectedDayIdx].push(newTask);
         sortTasksByTime();
         saveSchedules();
+
+        // Kalıcı havuza da kaydeder
+        customCatalog.push({ title: title, icon: "🎯", dur: 20 });
+        saveCustomCatalog();
+
+        renderCatalog();
         renderParentTaskList();
         document.getElementById('custom-title').value = '';
       }
     }
 
+    // iPhone saat seçicide modalın erken kapanmasını önleyen fonksiyon
     function updateTaskTime(index, newTime) {
       if (schedules[selectedDayIdx] && schedules[selectedDayIdx][index]) {
         schedules[selectedDayIdx][index].time = newTime;
         sortTasksByTime();
         saveSchedules();
-        renderParentTaskList();
       }
     }
 
@@ -753,12 +840,17 @@
       tasks.forEach((t, i) => {
         const row = document.createElement('div');
         row.className = 'parent-task-item';
+        
+        const avatarMini = t.photo 
+          ? `<img src="${t.photo}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">` 
+          : `<span>${t.icon || '⭐'}</span>`;
+
         row.innerHTML = `
           <div style="display:flex; align-items:center; gap:8px; flex:1;">
-            <span>${t.photo ? '📷' : (t.icon || '⭐')}</span>
+            ${avatarMini}
             <input type="time" class="time-input-inline" value="${t.time || '12:00'}" 
-                   onchange="updateTaskTime(${i}, this.value)">
-            <span style="font-size:0.9rem; font-weight:700; color:#FFF;">${t.title}</span>
+                   onblur="updateTaskTime(${i}, this.value)">
+            <span style="font-size:0.9rem; font-weight:700; color:var(--text);">${t.title}</span>
           </div>
           <div>
             <button onclick="deleteTask(${i})" style="color:#FF5252; border:none; background:none; font-size:1.1rem; cursor:pointer; padding:4px;">🗑️</button>
@@ -781,6 +873,7 @@
       alert("Yıldızlar sıfırlandı!");
     }
 
+    // 50 mm Termal Çıktı
     function printReceipt50mm() {
       const tasks = getTasks();
       if (!tasks || tasks.length === 0) return alert("Yazdırılacak görev bulunamadı.");
