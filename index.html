@@ -279,10 +279,24 @@
       justify-content: space-between;
       padding: 8px 10px;
       background: #F8F9FA;
-      border-radius: 10px;
-      margin-bottom: 6px;
+      border-radius: 12px;
+      margin-bottom: 8px;
       font-size: 0.95rem;
       font-weight: 600;
+    }
+    .time-input-inline {
+      border: 1.5px solid #CFD8DC;
+      border-radius: 8px;
+      padding: 4px 6px;
+      font-weight: 800;
+      color: #37474F;
+      background: #FFFFFF;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .time-input-inline:focus {
+      border-color: var(--primary);
     }
     /* 50MM TERMAL BASKI TASARIMI */
     @media print {
@@ -383,7 +397,7 @@
     <div class="queue-dots" id="dots-container"></div>
   </div>
 
-  <!-- 50 mm Termal Çıktı Bölümü (Gizli, sadece yazdırırken görünür) -->
+  <!-- 50 mm Termal Çıktı -->
   <div id="print-thermal-receipt">
     <div class="thermal-header">
       <div style="font-size: 13px; font-weight: 900;">BORA'NIN PLANI</div>
@@ -414,14 +428,14 @@
       <h4 style="margin: 14px 0 6px 0;">Veya Özel Resim / Görev Ekle</h4>
       <div style="display:flex; flex-direction:column; gap:8px; background:#F8F9FA; padding:10px; border-radius:12px;">
         <input type="text" id="custom-title" placeholder="Görev Adı (Örn: Legoları Kaldır)" style="padding:8px; border:1px solid #ccc; border-radius:8px;">
-        <div style="display:flex; gap:6px;">
-          <input type="time" id="custom-time" value="09:00" style="padding:6px; border:1px solid #ccc; border-radius:8px;">
-          <input type="file" id="custom-photo" accept="image/*" style="font-size:0.8rem;">
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="time" id="custom-time" value="09:00" class="time-input-inline">
+          <input type="file" id="custom-photo" accept="image/*" style="font-size:0.8rem; flex:1;">
         </div>
         <button class="btn-secondary" style="background:#42A5F5; color:white;" onclick="addCustomTask()">Listeye Ekle</button>
       </div>
 
-      <h4 style="margin: 14px 0 6px 0;" id="current-day-label">Seçili Günün Görevleri</h4>
+      <h4 style="margin: 16px 0 6px 0;" id="current-day-label">Seçili Günün Görevleri</h4>
       <div id="parent-task-list"></div>
     </div>
   </div>
@@ -433,7 +447,6 @@
     let activeTaskIdx = 0;
     let starCount = parseInt(localStorage.getItem('bora_stars') || '0');
 
-    // Genişletilmiş Varsayılan Havuz
     const CATALOG = [
       { title: "Kesme Biçme Vakti", icon: "✂️", dur: 20 },
       { title: "Kitap Okuma", icon: "📖", dur: 15 },
@@ -452,13 +465,11 @@
       { title: "Uyku Vakti", icon: "🌙", dur: 15 }
     ];
 
-    // Günlük planların saklanması
     let schedules = JSON.parse(localStorage.getItem('bora_schedules') || '{}');
 
-    // Eğer veri yoksa varsayılan şablonu oluştur
     if (!schedules[0]) {
       schedules = {
-        0: [ // Pazartesi
+        0: [
           { title: "Kahvaltı & Masa", icon: "🥣", time: "08:00", dur: 20 },
           { title: "Okul Hazırlığı", icon: "🎒", time: "08:30", dur: 15 },
           { title: "Kitap Okuma", icon: "📖", time: "16:30", dur: 20 },
@@ -466,7 +477,6 @@
           { title: "Uyku Vakti", icon: "🌙", time: "20:30", dur: 15 }
         ]
       };
-      // Diğer günleri kopyala
       for (let i = 1; i < 7; i++) {
         schedules[i] = JSON.parse(JSON.stringify(schedules[0]));
       }
@@ -477,7 +487,12 @@
       localStorage.setItem('bora_schedules', JSON.stringify(schedules));
     }
 
-    // Arayüzü Başlat
+    function sortTasksByTime() {
+      if (schedules[selectedDayIdx]) {
+        schedules[selectedDayIdx].sort((a, b) => (a.time || '00:00').localeCompare(b.time || '00:00'));
+      }
+    }
+
     function init() {
       document.getElementById('star-count').innerText = starCount;
       renderDays();
@@ -511,7 +526,6 @@
 
     function renderCurrentCard() {
       const tasks = getTasks();
-      const card = document.getElementById('current-card');
       const timeEl = document.getElementById('card-time');
       const titleEl = document.getElementById('card-title');
       const slotEl = document.getElementById('visual-slot');
@@ -540,7 +554,7 @@
         slotEl.innerHTML = t.icon || "⭐";
       }
 
-      resetTimer();
+      document.getElementById('timer-bar').style.strokeDashoffset = '0';
     }
 
     function renderDots() {
@@ -572,12 +586,6 @@
       }, 500);
     }
 
-    function resetTimer() {
-      const bar = document.getElementById('timer-bar');
-      bar.style.strokeDashoffset = '0';
-    }
-
-    // Web Audio Eğlenceli Ses Efekti
     function playSuccessSound() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -594,7 +602,6 @@
       } catch (e) {}
     }
 
-    // Sesli Okuma (SpeechSynthesis)
     function speakCurrentTask() {
       const tasks = getTasks();
       if (activeTaskIdx < tasks.length) {
@@ -605,7 +612,6 @@
       }
     }
 
-    // Ebeveyn Modu
     function openParentModal() {
       const code = prompt("Ebeveyn Kilidi: 3 + 4 = ?");
       if (code === "7") {
@@ -633,13 +639,17 @@
     }
 
     function addTaskFromCatalog(item) {
+      const suggestedTime = prompt(`"${item.title}" için başlangıç saati:`, "12:00");
+      if (suggestedTime === null) return;
+
       if (!schedules[selectedDayIdx]) schedules[selectedDayIdx] = [];
       schedules[selectedDayIdx].push({
         title: item.title,
         icon: item.icon,
-        time: "12:00",
+        time: suggestedTime.trim() || "12:00",
         dur: item.dur
       });
+      sortTasksByTime();
       saveSchedules();
       renderParentTaskList();
     }
@@ -660,6 +670,7 @@
             time: time,
             dur: 20
           });
+          sortTasksByTime();
           saveSchedules();
           renderParentTaskList();
           document.getElementById('custom-title').value = '';
@@ -673,9 +684,19 @@
           time: time,
           dur: 20
         });
+        sortTasksByTime();
         saveSchedules();
         renderParentTaskList();
         document.getElementById('custom-title').value = '';
+      }
+    }
+
+    function updateTaskTime(index, newTime) {
+      if (schedules[selectedDayIdx] && schedules[selectedDayIdx][index]) {
+        schedules[selectedDayIdx][index].time = newTime;
+        sortTasksByTime();
+        saveSchedules();
+        renderParentTaskList();
       }
     }
 
@@ -689,11 +710,14 @@
         const row = document.createElement('div');
         row.className = 'parent-task-item';
         row.innerHTML = `
-          <div>
-            ${t.photo ? '📷' : (t.icon || '⭐')} <strong>${t.time || ''}</strong> ${t.title}
+          <div style="display:flex; align-items:center; gap:8px; flex:1;">
+            <span>${t.photo ? '📷' : (t.icon || '⭐')}</span>
+            <input type="time" class="time-input-inline" value="${t.time || '12:00'}" 
+                   onchange="updateTaskTime(${i}, this.value)">
+            <span style="font-size:0.9rem; font-weight:700;">${t.title}</span>
           </div>
           <div>
-            <button onclick="deleteTask(${i})" style="color:red; border:none; background:none; cursor:pointer;">🗑️</button>
+            <button onclick="deleteTask(${i})" style="color:red; border:none; background:none; font-size:1.1rem; cursor:pointer; padding:4px;">🗑️</button>
           </div>
         `;
         el.appendChild(row);
@@ -713,7 +737,6 @@
       alert("Yıldızlar sıfırlandı!");
     }
 
-    // 50 mm Termal Yazıcı Fiş Baskısı
     function printReceipt50mm() {
       const tasks = getTasks();
       if (!tasks || tasks.length === 0) return alert("Yazdırılacak görev bulunamadı.");
@@ -741,3 +764,4 @@
   </script>
 </body>
 </html>
+
