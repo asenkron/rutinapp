@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bora'nın Rutin Çarkı</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bora'nın Günü">
+  <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/sun.png">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --primary: #FF7043;
+      --accent: #42A5F5;
+      --success: #66BB6A;
+      --bg: #F8F9FD;
+      --card-bg: #FFFFFF;
+      --text: #263238;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+      user-select: none;
+    }
+    header {
+      background: var(--card-bg);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .score-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFF9C4;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #F57F17;
+      box-shadow: 0 2px 5px rgba(245,127,23,0.15);
+    }
+    .days-nav {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #ECEFF1;
+      scrollbar-width: none;
+    }
+    .days-nav::-webkit-scrollbar { display: none; }
+    .day-btn {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 14px;
+      background: #FFFFFF;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #546E7A;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .day-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      transform: scale(1.04);
+      box-shadow: 0 3px 8px rgba(255,112,67,0.3);
+    }
+    .main-content {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 550px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .routine-card {
+      background: var(--card-bg);
+      border-radius: 26px;
+      width: 100%;
+      padding: 20px 16px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      border: 3px solid #ECEFF1;
+      transition: transform 0.2s;
+    }
+    .visual-wrapper {
+      width: 160px;
+      height: 160px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+    }
+    .visual-img-or-emoji {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 4.8rem;
+      background: #FFF3E0;
+      z-index: 2;
+    }
+    .timer-ring-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 160px;
+      height: 160px;
+      transform: rotate(-90deg);
+      z-index: 1;
+    }
+    .timer-ring-bg {
+      fill: none;
+      stroke: #F1F1F1;
+      stroke-width: 12;
+    }
+    .timer-ring-progress {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 12;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear;
+    }
+    .time-badge {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #37474F;
+      background: #ECEFF1;
+      padding: 4px 14px;
+      border-radius: 12px;
+      margin-top: 6px;
+    }
+    .task-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin: 10px 0 18px 0;
+      color: #263238;
+      text-align: center;
+    }
+    .action-controls {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-complete {
+      flex: 1;
+      background: linear-gradient(135deg, #66BB6A, #43A047);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 18px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      box-shadow: 0 6px 16px rgba(67,160,71,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-sound {
+      background: #E3F2FD;
+      color: var(--accent);
+      border: none;
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+    }
+    .queue-dots {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .queue-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #CFD8DC;
+      transition: 0.3s;
+    }
+    .queue-dot.active {
+      background: var(--primary);
+      transform: scale(1.3);
+    }
+    .queue-dot.completed {
+      background: var(--success);
+    }
+    /* Modal / Parent Panel */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 100;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    .modal-content {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 28px 28px 0 0;
+      padding: 22px 18px;
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+    .modal h3 { margin-top: 0; font-size: 1.3rem; }
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .catalog-item {
+      background: #F4F6F9;
+      padding: 10px 6px;
+      border-radius: 14px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .catalog-item:hover { border-color: var(--primary); }
+    .catalog-item span { font-size: 1.9rem; display: block; margin-bottom: 4px; }
+    .btn-secondary {
+      background: #ECEFF1;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #455A64;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .parent-task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: #F8F9FA;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    /* 50MM TERMAL BASKI TASARIMI */
+    @media print {
+      @page {
+        size: 50mm auto;
+        margin: 0;
+      }
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        margin: 0;
+        padding: 0;
+      }
+      header, .days-nav, .routine-card, .queue-dots, .modal, .no-print {
+        display: none !important;
+      }
+      #print-thermal-receipt {
+        display: block !important;
+        width: 48mm;
+        margin: 0 auto;
+        padding: 4mm 1mm;
+        font-family: -apple-system, monospace;
+        font-size: 11px;
+        color: #000;
+      }
+      .thermal-header {
+        text-align: center;
+        border-bottom: 1px dashed #000;
+        padding-bottom: 4px;
+        margin-bottom: 6px;
+      }
+      .thermal-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 0.5px solid #eee;
+      }
+      .thermal-time {
+        font-weight: 800;
+        font-size: 11px;
+        width: 38px;
+      }
+      .thermal-icon {
+        font-size: 16px;
+        margin: 0 4px;
+      }
+      .thermal-title {
+        flex: 1;
+        font-weight: 700;
+        font-size: 10px;
+      }
+      .thermal-star {
+        font-size: 15px;
+        font-weight: normal;
+        margin-left: 2px;
+      }
+    }
+    #print-thermal-receipt { display: none; }
+  </style>
+</head>
+<body>
+
+  <header class="no-print">
+    <div class="score-badge">
+      <span>⭐</span>
+      <span id="star-count">0</span>
+    </div>
+    <div style="font-weight: 800; color: #37474F; font-size: 1.1rem;">BORA'NIN GÜNÜ</div>
+    <button onclick="openParentModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
+  </header>
+
+  <div class="days-nav no-print" id="days-container"></div>
+
+  <div class="main-content no-print">
+    <div class="routine-card" id="current-card">
+      <div class="time-badge" id="card-time">08:00</div>
+      
+      <div class="visual-wrapper">
+        <svg class="timer-ring-svg">
+          <circle class="timer-ring-bg" cx="80" cy="80" r="70" />
+          <circle class="timer-ring-progress" id="timer-bar" cx="80" cy="80" r="70" 
+                  stroke-dasharray="439.8" stroke-dashoffset="0" />
+        </svg>
+        <div id="visual-slot" class="visual-img-or-emoji">🥣</div>
+      </div>
+
+      <div class="task-title" id="card-title">Kahvaltı</div>
+
+      <div class="action-controls">
+        <button class="btn-sound" onclick="speakCurrentTask()" title="Sesli Oku">🔊</button>
+        <button class="btn-complete" onclick="completeTask()">
+          <span>BİTİRDİM!</span> 🌟
+        </button>
+      </div>
+    </div>
+
+    <div class="queue-dots" id="dots-container"></div>
+  </div>
+
+  <!-- 50 mm Termal Çıktı Bölümü (Gizli, sadece yazdırırken görünür) -->
+  <div id="print-thermal-receipt">
+    <div class="thermal-header">
+      <div style="font-size: 13px; font-weight: 900;">BORA'NIN PLANI</div>
+      <div id="thermal-day-name" style="font-size: 11px; font-weight: 800; margin-top:2px;">PAZARTESİ</div>
+    </div>
+    <div id="thermal-rows"></div>
+    <div style="text-align: center; margin-top: 8px; font-size: 9px; border-top: 1px dashed #000; padding-top: 4px;">
+      ★ Aferin Bora! ★
+    </div>
+  </div>
+
+  <!-- Ebeveyn Yönetim Paneli -->
+  <div class="modal" id="parent-modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom: 12px;">
+        <h3 style="margin:0;">Ebeveyn & Günlük Plan</h3>
+        <button onclick="closeParentModal()" style="border:none; background:none; font-size:1.4rem; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+        <button class="btn-primary" style="flex:1;" onclick="printReceipt50mm()">🖨️ 50mm Termal Yazdır</button>
+        <button class="btn-secondary" onclick="resetStars()">⭐ Sıfırla</button>
+      </div>
+
+      <h4 style="margin: 10px 0 6px 0;">Havuzdan Görev Ekle</h4>
+      <div class="catalog-grid" id="catalog-list"></div>
+
+      <h4 style="margin: 14px 0 6px 0;">Veya Özel Resim / Görev Ekle</h4>
+      <div style="display:flex; flex-direction:column; gap:8px; background:#F8F9FA; padding:10px; border-radius:12px;">
+        <input type="text" id="custom-title" placeholder="Görev Adı (Örn: Legoları Kaldır)" style="padding:8px; border:1px solid #ccc; border-radius:8px;">
+        <div style="display:flex; gap:6px;">
+          <input type="time" id="custom-time" value="09:00" style="padding:6px; border:1px solid #ccc; border-radius:8px;">
+          <input type="file" id="custom-photo" accept="image/*" style="font-size:0.8rem;">
+        </div>
+        <button class="btn-secondary" style="background:#42A5F5; color:white;" onclick="addCustomTask()">Listeye Ekle</button>
+      </div>
+
+      <h4 style="margin: 14px 0 6px 0;" id="current-day-label">Seçili Günün Görevleri</h4>
+      <div id="parent-task-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    const DAY_NAMES = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+    let selectedDayIdx = 0;
+    let activeTaskIdx = 0;
+    let starCount = parseInt(localStorage.getItem('bora_stars') || '0');
+
+    // Genişletilmiş Varsayılan Havuz
+    const CATALOG = [
+      { title: "Kesme Biçme Vakti", icon: "✂️", dur: 20 },
+      { title: "Kitap Okuma", icon: "📖", dur: 15 },
+      { title: "Spor", icon: "⚽", dur: 30 },
+      { title: "Keşif", icon: "🔍", dur: 25 },
+      { title: "Bisiklet", icon: "🚲", dur: 30 },
+      { title: "Scooter", icon: "🛴", dur: 25 },
+      { title: "Opruimen (Toplama)", icon: "🧸", dur: 15 },
+      { title: "Bulaşıkları Toplama", icon: "🍽️", dur: 10 },
+      { title: "Masa Hazırlama", icon: "🥣", dur: 10 },
+      { title: "Yüzme", icon: "🏊‍♂️", dur: 45 },
+      { title: "Müzik", icon: "🎵", dur: 20 },
+      { title: "Okul", icon: "🎒", dur: 60 },
+      { title: "Diş Fırçalama", icon: "🪥", dur: 5 },
+      { title: "Banyo Vakti", icon: "🛁", dur: 20 },
+      { title: "Uyku Vakti", icon: "🌙", dur: 15 }
+    ];
+
+    // Günlük planların saklanması
+    let schedules = JSON.parse(localStorage.getItem('bora_schedules') || '{}');
+
+    // Eğer veri yoksa varsayılan şablonu oluştur
+    if (!schedules[0]) {
+      schedules = {
+        0: [ // Pazartesi
+          { title: "Kahvaltı & Masa", icon: "🥣", time: "08:00", dur: 20 },
+          { title: "Okul Hazırlığı", icon: "🎒", time: "08:30", dur: 15 },
+          { title: "Kitap Okuma", icon: "📖", time: "16:30", dur: 20 },
+          { title: "Opruimen", icon: "🧸", time: "18:00", dur: 15 },
+          { title: "Uyku Vakti", icon: "🌙", time: "20:30", dur: 15 }
+        ]
+      };
+      // Diğer günleri kopyala
+      for (let i = 1; i < 7; i++) {
+        schedules[i] = JSON.parse(JSON.stringify(schedules[0]));
+      }
+      saveSchedules();
+    }
+
+    function saveSchedules() {
+      localStorage.setItem('bora_schedules', JSON.stringify(schedules));
+    }
+
+    // Arayüzü Başlat
+    function init() {
+      document.getElementById('star-count').innerText = starCount;
+      renderDays();
+      renderCatalog();
+      loadDay(0);
+    }
+
+    function renderDays() {
+      const container = document.getElementById('days-container');
+      container.innerHTML = '';
+      DAYS.forEach((day, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `day-btn ${idx === selectedDayIdx ? 'active' : ''}`;
+        btn.innerText = day;
+        btn.onclick = () => loadDay(idx);
+        container.appendChild(btn);
+      });
+    }
+
+    function loadDay(idx) {
+      selectedDayIdx = idx;
+      activeTaskIdx = 0;
+      renderDays();
+      renderCurrentCard();
+      renderDots();
+    }
+
+    function getTasks() {
+      return schedules[selectedDayIdx] || [];
+    }
+
+    function renderCurrentCard() {
+      const tasks = getTasks();
+      const card = document.getElementById('current-card');
+      const timeEl = document.getElementById('card-time');
+      const titleEl = document.getElementById('card-title');
+      const slotEl = document.getElementById('visual-slot');
+
+      if (!tasks || tasks.length === 0) {
+        titleEl.innerText = "Plan bulunmuyor";
+        timeEl.innerText = "--:--";
+        slotEl.innerHTML = "🏖️";
+        return;
+      }
+
+      if (activeTaskIdx >= tasks.length) {
+        titleEl.innerText = "Günün Tüm Görevleri Bitti!";
+        timeEl.innerText = "Harika!";
+        slotEl.innerHTML = "🏆";
+        return;
+      }
+
+      const t = tasks[activeTaskIdx];
+      titleEl.innerText = t.title;
+      timeEl.innerText = t.time || "00:00";
+
+      if (t.photo) {
+        slotEl.innerHTML = `<img src="${t.photo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+      } else {
+        slotEl.innerHTML = t.icon || "⭐";
+      }
+
+      resetTimer();
+    }
+
+    function renderDots() {
+      const tasks = getTasks();
+      const container = document.getElementById('dots-container');
+      container.innerHTML = '';
+      tasks.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = `queue-dot ${i === activeTaskIdx ? 'active' : ''} ${i < activeTaskIdx ? 'completed' : ''}`;
+        container.appendChild(dot);
+      });
+    }
+
+    function completeTask() {
+      const tasks = getTasks();
+      if (activeTaskIdx >= tasks.length) return;
+
+      playSuccessSound();
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+
+      starCount += 1;
+      document.getElementById('star-count').innerText = starCount;
+      localStorage.setItem('bora_stars', starCount);
+
+      activeTaskIdx++;
+      setTimeout(() => {
+        renderCurrentCard();
+        renderDots();
+      }, 500);
+    }
+
+    function resetTimer() {
+      const bar = document.getElementById('timer-bar');
+      bar.style.strokeDashoffset = '0';
+    }
+
+    // Web Audio Eğlenceli Ses Efekti
+    function playSuccessSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      } catch (e) {}
+    }
+
+    // Sesli Okuma (SpeechSynthesis)
+    function speakCurrentTask() {
+      const tasks = getTasks();
+      if (activeTaskIdx < tasks.length) {
+        const text = tasks[activeTaskIdx].title;
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'tr-TR';
+        window.speechSynthesis.speak(msg);
+      }
+    }
+
+    // Ebeveyn Modu
+    function openParentModal() {
+      const code = prompt("Ebeveyn Kilidi: 3 + 4 = ?");
+      if (code === "7") {
+        document.getElementById('parent-modal').style.display = 'flex';
+        renderParentTaskList();
+      }
+    }
+
+    function closeParentModal() {
+      document.getElementById('parent-modal').style.display = 'none';
+      renderCurrentCard();
+      renderDots();
+    }
+
+    function renderCatalog() {
+      const el = document.getElementById('catalog-list');
+      el.innerHTML = '';
+      CATALOG.forEach(item => {
+        const d = document.createElement('div');
+        d.className = 'catalog-item';
+        d.innerHTML = `<span>${item.icon}</span>${item.title}`;
+        d.onclick = () => addTaskFromCatalog(item);
+        el.appendChild(d);
+      });
+    }
+
+    function addTaskFromCatalog(item) {
+      if (!schedules[selectedDayIdx]) schedules[selectedDayIdx] = [];
+      schedules[selectedDayIdx].push({
+        title: item.title,
+        icon: item.icon,
+        time: "12:00",
+        dur: item.dur
+      });
+      saveSchedules();
+      renderParentTaskList();
+    }
+
+    function addCustomTask() {
+      const title = document.getElementById('custom-title').value.trim();
+      const time = document.getElementById('custom-time').value;
+      const fileInput = document.getElementById('custom-photo');
+
+      if (!title) return alert("Lütfen bir başlık girin.");
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          schedules[selectedDayIdx].push({
+            title: title,
+            photo: e.target.result,
+            time: time,
+            dur: 20
+          });
+          saveSchedules();
+          renderParentTaskList();
+          document.getElementById('custom-title').value = '';
+          fileInput.value = '';
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        schedules[selectedDayIdx].push({
+          title: title,
+          icon: "🎯",
+          time: time,
+          dur: 20
+        });
+        saveSchedules();
+        renderParentTaskList();
+        document.getElementById('custom-title').value = '';
+      }
+    }
+
+    function renderParentTaskList() {
+      document.getElementById('current-day-label').innerText = `${DAY_NAMES[selectedDayIdx]} Görevleri`;
+      const el = document.getElementById('parent-task-list');
+      el.innerHTML = '';
+      const tasks = getTasks();
+
+      tasks.forEach((t, i) => {
+        const row = document.createElement('div');
+        row.className = 'parent-task-item';
+        row.innerHTML = `
+          <div>
+            ${t.photo ? '📷' : (t.icon || '⭐')} <strong>${t.time || ''}</strong> ${t.title}
+          </div>
+          <div>
+            <button onclick="deleteTask(${i})" style="color:red; border:none; background:none; cursor:pointer;">🗑️</button>
+          </div>
+        `;
+        el.appendChild(row);
+      });
+    }
+
+    function deleteTask(index) {
+      schedules[selectedDayIdx].splice(index, 1);
+      saveSchedules();
+      renderParentTaskList();
+    }
+
+    function resetStars() {
+      starCount = 0;
+      localStorage.setItem('bora_stars', '0');
+      document.getElementById('star-count').innerText = 0;
+      alert("Yıldızlar sıfırlandı!");
+    }
+
+    // 50 mm Termal Yazıcı Fiş Baskısı
+    function printReceipt50mm() {
+      const tasks = getTasks();
+      if (!tasks || tasks.length === 0) return alert("Yazdırılacak görev bulunamadı.");
+
+      document.getElementById('thermal-day-name').innerText = DAY_NAMES[selectedDayIdx].toUpperCase();
+      const container = document.getElementById('thermal-rows');
+      container.innerHTML = '';
+
+      tasks.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'thermal-row';
+        row.innerHTML = `
+          <span class="thermal-time">${t.time || '--:--'}</span>
+          <span class="thermal-icon">${t.icon || '★'}</span>
+          <span class="thermal-title">${t.title}</span>
+          <span class="thermal-star">☆</span>
+        `;
+        container.appendChild(row);
+      });
+
+      window.print();
+    }
+
+    init();
+  </script>
+</body>
+</html>
